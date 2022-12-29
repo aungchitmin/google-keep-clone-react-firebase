@@ -1,7 +1,7 @@
 import React from "react";
 import firebaseLogo from "../imgs/firebase-logo.png";
 import googleKeepLogo from "../imgs/keep-logo.png";
-import { doc, setDoc } from "firebase/firestore";
+import { serverTimestamp, addDoc, collection } from "firebase/firestore";
 import { useRef } from "react";
 import { db } from "../firebase";
 import { useContext } from "react";
@@ -25,16 +25,17 @@ const Form = () => {
     const titleValue = titleRef.current.value;
     const textValue = textAreaRef.current.value;
 
-    // try {
-    //   await setDoc(doc(db, "notes"), {
-    //     title: titleValue,
-    //     body: textValue,
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    // }
-    console.log(titleValue, textValue);
-    dispatch({ type: "DONE" });
+    try {
+      const res = await addDoc(collection(db, "notes"), {
+        title: titleValue,
+        content: textValue,
+        timestamp: serverTimestamp(),
+      });
+      console.log(res);
+      dispatch({ type: "DONE" });
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="form-container container mx-auto ">
