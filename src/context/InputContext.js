@@ -6,6 +6,7 @@ export const InputContextProvider = ({ children }) => {
   const INITIAL_STATE = {
     title: "",
     content: "",
+    id: "",
     btnChange: false,
   };
 
@@ -25,12 +26,14 @@ export const InputContextProvider = ({ children }) => {
         return {
           title: action.payload.title,
           content: action.payload.content,
+          id: action.payload.id,
           btnChange: true,
         };
       case "DONE":
         return {
           title: "",
           content: "",
+          id: "",
           btnChange: false,
         };
 

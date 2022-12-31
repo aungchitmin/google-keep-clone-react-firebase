@@ -1,16 +1,24 @@
 import React from "react";
 import firebaseLogo from "../imgs/firebase-logo.png";
 import googleKeepLogo from "../imgs/keep-logo.png";
-import { serverTimestamp, addDoc, collection } from "firebase/firestore";
+import {
+  serverTimestamp,
+  addDoc,
+  collection,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 import { useRef } from "react";
 import { db } from "../firebase";
 import { useContext } from "react";
 import { InputContext } from "../context/InputContext";
+import { useEffect } from "react";
 
 const Form = () => {
   const { data, dispatch } = useContext(InputContext);
   const titleRef = useRef(null);
   const textAreaRef = useRef(null);
+  const scrollRef = useRef()
 
   const handleTitleChange = (e) => {
     dispatch({ type: "TITLE", payload: e.target.value });
@@ -26,19 +34,35 @@ const Form = () => {
     const textValue = textAreaRef.current.value;
 
     try {
-      const res = await addDoc(collection(db, "notes"), {
-        title: titleValue,
-        content: textValue,
-        timestamp: serverTimestamp(),
-      });
-      console.log(res);
+      //if btn is Add
+      if (!data.btnChange) {
+        await addDoc(collection(db, "notes"), {
+          title: titleValue,
+          content: textValue,
+          timestamp: serverTimestamp(),
+        });
+      } else {
+        //if btn is update
+        const noteRef = doc(db, "notes", data.id);
+
+        await updateDoc(noteRef, {
+          title: titleValue,
+          content: textValue,
+          timestamp: serverTimestamp(),
+        });
+      }
       dispatch({ type: "DONE" });
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => (
+    scrollRef.current?.scrollIntoView({behavior: "smooth"})
+  ),[data])
+
   return (
-    <div className="form-container container mx-auto ">
+    <div className="form-container container mx-auto "  ref={scrollRef}>
       <div className="logos flex items-center justify-evenly border mx-5 mt-5 bg-slate-300">
         <div className="logo-1 w-8 p-1 m-1">
           <img src={firebaseLogo} alt="" className="object-cover" />
@@ -72,7 +96,7 @@ const Form = () => {
               onChange={(e) => handleContentChange(e)}
             ></textarea>
             <span
-              className="absolute bg-green-400 rounded-lg p-2 -bottom-4 right-2 cursor-pointer"
+              className="absolute bg-green-300 rounded-lg p-2 -bottom-4 right-2 cursor-pointer font-normal"
               onClick={(e) => handleSubmit(e)}
             >
               {data.btnChange ? "Update" : "Add"}
